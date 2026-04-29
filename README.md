@@ -1,6 +1,12 @@
 # docker/setup-buildx-action
 
-Hardened GitHub Action by [Chainguard](https://www.chainguard.dev).
+Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/docker/setup-buildx-action](https://github.com/docker/setup-buildx-action).
+
+## Versions
+
+| Version | Tag | Upstream commit |
+|---------|-----|-----------------|
+| v4.0.0 | [`v4.0.0`](https://github.com/chainguard-actions/setup-buildx-action/tree/v4.0.0) | — |
 
 ## Privacy
 
