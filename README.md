@@ -1,5 +1,7 @@
 # docker/setup-buildx-action
 
+GitHub Action to set up Docker Buildx
+
 Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/docker/setup-buildx-action](https://github.com/docker/setup-buildx-action).
 
 ## Versions
