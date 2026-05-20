@@ -1,7 +1,0 @@
-{
-  "owner": "docker",
-  "name": "setup-buildx-action",
-  "visibility": "internal",
-  "description": "GitHub Action to set up Docker Buildx",
-  "block_publish": false
-}
