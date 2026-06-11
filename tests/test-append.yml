@@ -1,0 +1,45 @@
+name: Test append input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create initial builder
+        id: buildx-initial
+        uses: .
+        with:
+          name: append-test-builder
+          driver: docker-container
+          use: 'true'
+          cleanup: 'false'
+      - name: Assert initial builder name
+        env:
+          ACTUAL: ${{ steps.buildx-initial.outputs.name }}
+        run: |
+          echo "actual name: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected builder name to be non-empty"
+            exit 1
+          fi
+          echo "PASS: builder name is $ACTUAL"
+      - name: Append node to builder
+        id: buildx-append
+        uses: .
+        with:
+          name: append-test-builder
+          append: |
+            - endpoint: unix:///var/run/docker.sock
+          use: 'true'
+          cleanup: 'true'
+      - name: Assert appended builder name
+        env:
+          ACTUAL: ${{ steps.buildx-append.outputs.name }}
+        run: |
+          echo "actual name: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected builder name to be non-empty"
+            exit 1
+          fi
+          echo "PASS: builder name is $ACTUAL"

@@ -1,0 +1,37 @@
+name: Test platforms and driver-opts inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          driver: docker-container
+          driver-opts: |
+            image=moby/buildkit:latest
+          platforms: linux/amd64
+          use: 'true'
+          cleanup: 'true'
+      - name: Assert platforms output is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.platforms }}
+        run: |
+          echo "actual platforms: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected platforms to be non-empty"
+            exit 1
+          fi
+          echo "PASS: platforms is $ACTUAL"
+      - name: Assert driver output is docker-container
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "actual driver: $ACTUAL"
+          if [ "$ACTUAL" != "docker-container" ]; then
+            echo "FAIL: expected driver to be 'docker-container', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"

@@ -1,0 +1,45 @@
+name: Test basic usage with version and name
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          version: latest
+          name: my-test-builder
+          use: 'true'
+          cleanup: 'true'
+      - name: Assert builder name output is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "actual name: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected builder name to be non-empty"
+            exit 1
+          fi
+          echo "PASS: builder name is $ACTUAL"
+      - name: Assert driver output is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "actual driver: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected driver to be non-empty"
+            exit 1
+          fi
+          echo "PASS: driver is $ACTUAL"
+      - name: Assert status output is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.status }}
+        run: |
+          echo "actual status: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected status to be non-empty"
+            exit 1
+          fi
+          echo "PASS: status is $ACTUAL"
