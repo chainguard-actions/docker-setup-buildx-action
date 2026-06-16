@@ -1,0 +1,46 @@
+name: Test endpoint and append inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      # First create a base builder
+      - id: base-builder
+        uses: .
+        with:
+          name: 'base-builder'
+          driver: 'docker-container'
+          use: 'true'
+          cleanup: 'false'
+      - name: Assert base builder name output is set
+        env:
+          BUILDER_NAME: ${{ steps.base-builder.outputs.name }}
+        run: |
+          echo "base builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS"
+      # Now append a node using endpoint and append inputs
+      - id: appended-builder
+        uses: .
+        with:
+          name: 'base-builder'
+          endpoint: 'unix:///var/run/docker.sock'
+          append: |
+            - endpoint: unix:///var/run/docker.sock
+          use: 'true'
+          cleanup: 'true'
+      - name: Assert appended builder name output is set
+        env:
+          BUILDER_NAME: ${{ steps.appended-builder.outputs.name }}
+        run: |
+          echo "appended builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS"

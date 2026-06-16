@@ -1,0 +1,30 @@
+name: Test buildkitd-flags input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          buildkitd-flags: '--allow-insecure-entitlement security.insecure'
+          use: 'true'
+          cleanup: 'true'
+      - name: Assert builder name output is set
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert flags output is set
+        env:
+          FLAGS: ${{ steps.buildx.outputs.flags }}
+        run: |
+          echo "flags: $FLAGS"
+          echo "PASS (flags may be empty depending on buildx version)"

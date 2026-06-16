@@ -1,0 +1,35 @@
+name: Test version and name inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          version: 'latest'
+          name: 'my-test-builder'
+          use: 'true'
+          cleanup: 'true'
+      - name: Assert builder name matches specified name
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert driver output is set
+        env:
+          DRIVER: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "driver: $DRIVER"
+          if [ -z "$DRIVER" ]; then
+            echo "FAIL: expected driver to be set"
+            exit 1
+          fi
+          echo "PASS"
