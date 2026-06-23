@@ -8,7 +8,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
-| v4.0.0 | [`v4.0.0`](https://github.com/chainguard-actions/docker-setup-buildx-action/tree/v4.0.0) | [`4d04d5d`](https://github.com/docker/setup-buildx-action/commit/4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd) |
+| v4.0.0 | [`v4.0.0`](https://github.com/chainguard-actions/docker-setup-buildx-action/tree/v4.0.0) | — |
 | v4.1.0 | [`v4.1.0`](https://github.com/chainguard-actions/docker-setup-buildx-action/tree/v4.1.0) | [`d7f5e7f`](https://github.com/docker/setup-buildx-action/commit/d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5) |
 
 ## Privacy
