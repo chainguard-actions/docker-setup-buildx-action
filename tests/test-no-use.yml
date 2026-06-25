@@ -1,0 +1,46 @@
+name: Test use=false does not switch builder
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Get current builder before action
+        id: before
+        run: |
+          CURRENT=$(docker buildx ls | grep '\*' | awk '{print $1}' | tr -d '*' | head -1)
+          echo "current=$CURRENT"
+          echo "current=$CURRENT" >> $GITHUB_OUTPUT
+      - id: buildx
+        uses: .
+        with:
+          name: 'no-use-builder'
+          driver: 'docker-container'
+          use: 'false'
+          cleanup: 'false'
+      - name: Assert builder name is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "actual name: $ACTUAL"
+          if [ "$ACTUAL" != "no-use-builder" ]; then
+            echo "FAIL: expected builder name 'no-use-builder', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert builder exists but is not current
+        run: |
+          echo "Listing builders:"
+          docker buildx ls
+          if ! docker buildx ls | grep -q 'no-use-builder'; then
+            echo "FAIL: builder 'no-use-builder' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: builder 'no-use-builder' exists"
+          # Verify it's not marked as current (no asterisk next to it)
+          if docker buildx ls | grep 'no-use-builder' | grep -q '\*'; then
+            echo "FAIL: builder 'no-use-builder' should not be the current builder"
+            exit 1
+          fi
+          echo "PASS: builder 'no-use-builder' is not the current builder"

@@ -1,0 +1,46 @@
+name: Test deprecated config and config-inline inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          driver: 'docker-container'
+          config-inline: |
+            [worker.oci]
+              max-parallelism = 2
+          use: 'true'
+      - name: Assert builder name is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "actual name: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected builder name to be non-empty"
+            exit 1
+          fi
+          echo "PASS: builder name is '$ACTUAL'"
+      - name: Assert driver is docker-container
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "actual driver: $ACTUAL"
+          if [ "$ACTUAL" != "docker-container" ]; then
+            echo "FAIL: expected driver 'docker-container', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert status is running
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.status }}
+        run: |
+          echo "actual status: $ACTUAL"
+          if [ "$ACTUAL" != "running" ]; then
+            echo "FAIL: expected status 'running', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"

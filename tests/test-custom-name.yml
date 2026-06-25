@@ -1,0 +1,43 @@
+name: Test custom builder name
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          name: 'my-test-builder'
+          driver: 'docker-container'
+          use: 'true'
+      - name: Assert builder name matches input
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "actual name: $ACTUAL"
+          if [ "$ACTUAL" != "my-test-builder" ]; then
+            echo "FAIL: expected builder name 'my-test-builder', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert driver is docker-container
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "actual driver: $ACTUAL"
+          if [ "$ACTUAL" != "docker-container" ]; then
+            echo "FAIL: expected driver 'docker-container', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert builder exists in docker buildx ls
+        run: |
+          echo "Listing builders:"
+          docker buildx ls
+          if ! docker buildx ls | grep -q 'my-test-builder'; then
+            echo "FAIL: builder 'my-test-builder' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: builder 'my-test-builder' found"

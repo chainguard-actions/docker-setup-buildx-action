@@ -1,0 +1,71 @@
+name: Test basic usage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          use: 'true'
+      - name: Assert builder name is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "actual name: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected builder name to be non-empty"
+            exit 1
+          fi
+          echo "PASS: builder name is '$ACTUAL'"
+      - name: Assert driver is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "actual driver: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected driver to be non-empty"
+            exit 1
+          fi
+          echo "PASS: driver is '$ACTUAL'"
+      - name: Assert platforms is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.platforms }}
+        run: |
+          echo "actual platforms: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected platforms to be non-empty"
+            exit 1
+          fi
+          echo "PASS: platforms is '$ACTUAL'"
+      - name: Assert nodes is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.nodes }}
+        run: |
+          echo "actual nodes: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected nodes to be non-empty"
+            exit 1
+          fi
+          echo "PASS: nodes is '$ACTUAL'"
+      - name: Assert status is running
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.status }}
+        run: |
+          echo "actual status: $ACTUAL"
+          if [ "$ACTUAL" != "running" ]; then
+            echo "FAIL: expected status 'running', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert buildx is current builder
+        run: |
+          CURRENT=$(docker buildx ls | grep '\*' | awk '{print $1}' | tr -d '*')
+          echo "current builder: $CURRENT"
+          if [ -z "$CURRENT" ]; then
+            echo "FAIL: no active builder found"
+            exit 1
+          fi
+          echo "PASS: active builder is '$CURRENT'"
