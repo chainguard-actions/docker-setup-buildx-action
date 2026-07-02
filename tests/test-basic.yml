@@ -1,0 +1,57 @@
+name: Test basic usage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          driver: 'docker'
+          use: 'true'
+      - name: Assert builder name output is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "actual name: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected builder name to be non-empty"
+            exit 1
+          fi
+          echo "PASS: builder name is '$ACTUAL'"
+      - name: Assert driver output is docker
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "actual driver: $ACTUAL"
+          if [ "$ACTUAL" != "docker" ]; then
+            echo "FAIL: expected driver to be 'docker', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: driver is '$ACTUAL'"
+      - name: Assert platforms output is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.platforms }}
+        run: |
+          echo "actual platforms: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected platforms to be non-empty"
+            exit 1
+          fi
+          echo "PASS: platforms is '$ACTUAL'"
+      - name: Assert nodes output is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.nodes }}
+        run: |
+          echo "actual nodes: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected nodes to be non-empty"
+            exit 1
+          fi
+          echo "PASS: nodes output is set"
+      - name: Assert buildx is available
+        run: |
+          docker buildx version
+          echo "PASS: docker buildx is available"
