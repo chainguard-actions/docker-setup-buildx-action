@@ -1,4 +1,4 @@
-name: Test buildkitd-config input
+name: Test driver-opts input
 on:
   workflow_dispatch:
 jobs:
@@ -10,7 +10,7 @@ jobs:
         uses: .
         with:
           driver: 'docker-container'
-          buildkitd-config: '${{ github.workspace }}/hardened/tests/fixtures/buildkitd.toml'
+          driver-opts: 'network=host'
           use: 'true'
       - name: Assert builder name output is set
         env:

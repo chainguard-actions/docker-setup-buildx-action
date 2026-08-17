@@ -1,4 +1,4 @@
-name: Test platforms input
+name: Test buildx with fixed platforms
 on:
   workflow_dispatch:
 jobs:
@@ -9,10 +9,9 @@ jobs:
       - id: buildx
         uses: .
         with:
-          driver: 'docker-container'
-          platforms: 'linux/amd64,linux/arm64'
-          use: 'true'
-      - name: Assert builder name is set
+          driver: docker-container
+          platforms: linux/amd64,linux/arm64
+      - name: Assert builder name output is set
         env:
           ACTUAL: ${{ steps.buildx.outputs.name }}
         run: |
@@ -22,7 +21,7 @@ jobs:
             exit 1
           fi
           echo "PASS: builder name is '$ACTUAL'"
-      - name: Assert platforms output is set
+      - name: Assert platforms output contains linux/amd64
         env:
           ACTUAL: ${{ steps.buildx.outputs.platforms }}
         run: |
@@ -31,14 +30,18 @@ jobs:
             echo "FAIL: expected platforms to be non-empty"
             exit 1
           fi
-          echo "PASS: platforms is '$ACTUAL'"
-      - name: Assert status is running
-        env:
-          ACTUAL: ${{ steps.buildx.outputs.status }}
-        run: |
-          echo "actual status: $ACTUAL"
-          if [ "$ACTUAL" != "running" ]; then
-            echo "FAIL: expected status 'running', got '$ACTUAL'"
+          if ! echo "$ACTUAL" | grep -q "linux/amd64"; then
+            echo "FAIL: expected platforms to contain 'linux/amd64' but got '$ACTUAL'"
             exit 1
           fi
-          echo "PASS"
+          echo "PASS: platforms contains 'linux/amd64'"
+      - name: Assert platforms output contains linux/arm64
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.platforms }}
+        run: |
+          echo "actual platforms: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -q "linux/arm64"; then
+            echo "FAIL: expected platforms to contain 'linux/arm64' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: platforms contains 'linux/arm64'"

@@ -1,0 +1,43 @@
+name: Test buildx with use=false
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          use: 'false'
+          name: non-default-builder
+      - name: Assert builder name output is set
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "actual name: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected builder name to be non-empty"
+            exit 1
+          fi
+          echo "PASS: builder name is '$ACTUAL'"
+      - name: Assert builder exists but is not the active builder
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "checking builder: $BUILDER_NAME"
+          # Builder should exist
+          if ! docker buildx ls | grep -q "$BUILDER_NAME"; then
+            echo "FAIL: builder '$BUILDER_NAME' not found in docker buildx ls"
+            docker buildx ls
+            exit 1
+          fi
+          echo "PASS: builder '$BUILDER_NAME' exists"
+          # The active builder (marked with *) should NOT be our builder
+          ACTIVE=$(docker buildx ls | grep '\*' | awk '{print $1}' | sed 's/\*//')
+          echo "active builder: $ACTIVE"
+          if [ "$ACTIVE" = "$BUILDER_NAME" ]; then
+            echo "FAIL: builder '$BUILDER_NAME' should not be the active builder when use=false"
+            exit 1
+          fi
+          echo "PASS: '$BUILDER_NAME' is not the active builder"

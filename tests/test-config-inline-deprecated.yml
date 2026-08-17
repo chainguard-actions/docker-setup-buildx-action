@@ -1,4 +1,4 @@
-name: Test buildkitd-config input
+name: Test deprecated config-inline input
 on:
   workflow_dispatch:
 jobs:
@@ -10,7 +10,9 @@ jobs:
         uses: .
         with:
           driver: 'docker-container'
-          buildkitd-config: '${{ github.workspace }}/hardened/tests/fixtures/buildkitd.toml'
+          config-inline: |
+            [worker.oci]
+              max-parallelism = 4
           use: 'true'
       - name: Assert builder name output is set
         env:

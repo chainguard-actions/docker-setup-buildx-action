@@ -1,4 +1,4 @@
-name: Test buildkitd-config input
+name: Test deprecated config input
 on:
   workflow_dispatch:
 jobs:
@@ -10,7 +10,7 @@ jobs:
         uses: .
         with:
           driver: 'docker-container'
-          buildkitd-config: '${{ github.workspace }}/hardened/tests/fixtures/buildkitd.toml'
+          config: '${{ github.workspace }}/hardened/tests/fixtures/buildkitd.toml'
           use: 'true'
       - name: Assert builder name output is set
         env:

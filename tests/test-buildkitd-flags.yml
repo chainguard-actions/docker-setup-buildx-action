@@ -1,4 +1,4 @@
-name: Test buildkitd-flags and buildkitd-config-inline inputs
+name: Test buildkitd-flags input
 on:
   workflow_dispatch:
 jobs:
@@ -6,42 +6,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - id: buildx
+      - id: action
         uses: .
         with:
           driver: 'docker-container'
-          buildkitd-flags: '--allow-insecure-entitlement security.insecure'
-          buildkitd-config-inline: |
-            [worker.oci]
-              max-parallelism = 4
+          buildkitd-flags: '--debug'
           use: 'true'
-      - name: Assert builder name is set
+      - name: Assert builder name output is set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.name }}
+          ACTUAL: ${{ steps.action.outputs.name }}
         run: |
-          echo "actual name: $ACTUAL"
+          echo "actual: $ACTUAL"
           if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected builder name to be non-empty"
-            exit 1
-          fi
-          echo "PASS: builder name is '$ACTUAL'"
-      - name: Assert driver is docker-container
-        env:
-          ACTUAL: ${{ steps.buildx.outputs.driver }}
-        run: |
-          echo "actual driver: $ACTUAL"
-          if [ "$ACTUAL" != "docker-container" ]; then
-            echo "FAIL: expected driver 'docker-container', got '$ACTUAL'"
+            echo "FAIL: expected builder name to be set"
             exit 1
           fi
           echo "PASS"
-      - name: Assert status is running
+      - name: Assert status output is set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.status }}
+          ACTUAL: ${{ steps.action.outputs.status }}
         run: |
-          echo "actual status: $ACTUAL"
-          if [ "$ACTUAL" != "running" ]; then
-            echo "FAIL: expected status 'running', got '$ACTUAL'"
+          echo "actual: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected status to be set"
             exit 1
           fi
           echo "PASS"

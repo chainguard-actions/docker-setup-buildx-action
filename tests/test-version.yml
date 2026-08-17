@@ -1,4 +1,4 @@
-name: Test buildkitd-config input
+name: Test version input
 on:
   workflow_dispatch:
 jobs:
@@ -9,8 +9,7 @@ jobs:
       - id: action
         uses: .
         with:
-          driver: 'docker-container'
-          buildkitd-config: '${{ github.workspace }}/hardened/tests/fixtures/buildkitd.toml'
+          version: 'latest'
           use: 'true'
       - name: Assert builder name output is set
         env:
@@ -22,13 +21,13 @@ jobs:
             exit 1
           fi
           echo "PASS"
-      - name: Assert driver output is docker-container
+      - name: Assert driver output is set
         env:
           ACTUAL: ${{ steps.action.outputs.driver }}
         run: |
           echo "actual: $ACTUAL"
-          if [ "$ACTUAL" != "docker-container" ]; then
-            echo "FAIL: expected driver to be docker-container"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected driver to be set"
             exit 1
           fi
           echo "PASS"

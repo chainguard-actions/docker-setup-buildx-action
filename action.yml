@@ -5,6 +5,7 @@ author: 'docker'
 branding:
   icon: 'anchor'
   color: 'blue'
+
 inputs:
   version:
     description: 'Buildx version. (eg. v0.3.0)'
@@ -67,6 +68,7 @@ inputs:
     deprecationMessage: '"docker buildx install" command is deprecated and will be removed in a future release, use BUILDX_BUILDER environment variable instead'
     default: 'false'
     required: false
+
 outputs:
   name:
     description: 'Builder name'
@@ -82,8 +84,9 @@ outputs:
     description: 'Builder node status (deprecated, use nodes output instead)'
   flags:
     description: 'Builder node flags (deprecated, use nodes output instead)'
+
 runs:
+  pre: chainguard-phonehome.js
   using: 'node20'
   main: 'dist/index.js'
   post: 'dist/index.js'
-  pre: chainguard-phonehome.js

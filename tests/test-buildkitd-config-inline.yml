@@ -1,4 +1,4 @@
-name: Test buildx with custom builder name
+name: Test buildx with inline buildkitd config
 on:
   workflow_dispatch:
 jobs:
@@ -9,18 +9,20 @@ jobs:
       - id: buildx
         uses: .
         with:
-          name: my-custom-builder
           driver: docker-container
-      - name: Assert builder name matches custom name
+          buildkitd-config-inline: |
+            [worker.oci]
+              max-parallelism = 2
+      - name: Assert builder name output is set
         env:
           ACTUAL: ${{ steps.buildx.outputs.name }}
         run: |
           echo "actual name: $ACTUAL"
-          if [ "$ACTUAL" != "my-custom-builder" ]; then
-            echo "FAIL: expected builder name 'my-custom-builder' but got '$ACTUAL'"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected builder name to be non-empty"
             exit 1
           fi
-          echo "PASS: builder name is 'my-custom-builder'"
+          echo "PASS: builder name is '$ACTUAL'"
       - name: Assert driver output is docker-container
         env:
           ACTUAL: ${{ steps.buildx.outputs.driver }}
@@ -31,14 +33,13 @@ jobs:
             exit 1
           fi
           echo "PASS: driver is 'docker-container'"
-      - name: Assert builder exists in docker buildx ls
+      - name: Assert status output is running
         env:
-          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+          ACTUAL: ${{ steps.buildx.outputs.status }}
         run: |
-          echo "checking for builder: $BUILDER_NAME"
-          if ! docker buildx ls | grep -q "$BUILDER_NAME"; then
-            echo "FAIL: builder '$BUILDER_NAME' not found in docker buildx ls"
-            docker buildx ls
+          echo "actual status: $ACTUAL"
+          if [ "$ACTUAL" != "running" ]; then
+            echo "FAIL: expected status 'running' but got '$ACTUAL'"
             exit 1
           fi
-          echo "PASS: builder '$BUILDER_NAME' found"
+          echo "PASS: status is 'running'"

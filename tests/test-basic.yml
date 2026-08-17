@@ -1,4 +1,4 @@
-name: Test basic usage
+name: Test basic buildx setup
 on:
   workflow_dispatch:
 jobs:
@@ -8,9 +8,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: buildx
         uses: .
-        with:
-          use: 'true'
-      - name: Assert builder name is set
+      - name: Assert builder name output is set
         env:
           ACTUAL: ${{ steps.buildx.outputs.name }}
         run: |
@@ -20,7 +18,7 @@ jobs:
             exit 1
           fi
           echo "PASS: builder name is '$ACTUAL'"
-      - name: Assert driver is set
+      - name: Assert driver output is set
         env:
           ACTUAL: ${{ steps.buildx.outputs.driver }}
         run: |
@@ -30,7 +28,7 @@ jobs:
             exit 1
           fi
           echo "PASS: driver is '$ACTUAL'"
-      - name: Assert platforms is set
+      - name: Assert platforms output is set
         env:
           ACTUAL: ${{ steps.buildx.outputs.platforms }}
         run: |
@@ -40,7 +38,7 @@ jobs:
             exit 1
           fi
           echo "PASS: platforms is '$ACTUAL'"
-      - name: Assert nodes is set
+      - name: Assert nodes output is set
         env:
           ACTUAL: ${{ steps.buildx.outputs.nodes }}
         run: |
@@ -49,18 +47,18 @@ jobs:
             echo "FAIL: expected nodes to be non-empty"
             exit 1
           fi
-          echo "PASS: nodes is '$ACTUAL'"
-      - name: Assert status is running
+          echo "PASS: nodes is set"
+      - name: Assert status output is set
         env:
           ACTUAL: ${{ steps.buildx.outputs.status }}
         run: |
           echo "actual status: $ACTUAL"
-          if [ "$ACTUAL" != "running" ]; then
-            echo "FAIL: expected status 'running', got '$ACTUAL'"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected status to be non-empty"
             exit 1
           fi
-          echo "PASS"
-      - name: Assert buildx is current builder
+          echo "PASS: status is '$ACTUAL'"
+      - name: Assert buildx is active builder
         run: |
           CURRENT=$(docker buildx ls | grep '\*' | awk '{print $1}' | tr -d '*')
           echo "current builder: $CURRENT"

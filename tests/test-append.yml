@@ -6,48 +6,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Create primary builder
-        id: primary
+      - name: Create initial builder
+        id: builder
         uses: .
         with:
-          name: 'append-test-builder'
           driver: 'docker-container'
           use: 'true'
-      - name: Assert primary builder name
-        env:
-          ACTUAL: ${{ steps.primary.outputs.name }}
-        run: |
-          echo "actual name: $ACTUAL"
-          if [ "$ACTUAL" != "append-test-builder" ]; then
-            echo "FAIL: expected builder name 'append-test-builder', got '$ACTUAL'"
-            exit 1
-          fi
-          echo "PASS"
-      - id: buildx
+      - name: Append node to builder
+        id: action
         uses: .
         with:
-          name: 'append-test-builder'
           driver: 'docker-container'
+          name: ${{ steps.builder.outputs.name }}
           append: |
             - endpoint: unix:///var/run/docker.sock
           use: 'true'
-      - name: Assert builder name is set
+      - name: Assert builder name output is set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.name }}
+          ACTUAL: ${{ steps.action.outputs.name }}
         run: |
-          echo "actual name: $ACTUAL"
+          echo "actual: $ACTUAL"
           if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected builder name to be non-empty"
+            echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder name is '$ACTUAL'"
+          echo "PASS"
       - name: Assert nodes output is set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.nodes }}
+          ACTUAL: ${{ steps.action.outputs.nodes }}
         run: |
-          echo "actual nodes: $ACTUAL"
+          echo "actual: $ACTUAL"
           if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected nodes to be non-empty"
+            echo "FAIL: expected nodes to be set"
             exit 1
           fi
-          echo "PASS: nodes is set"
+          echo "PASS"

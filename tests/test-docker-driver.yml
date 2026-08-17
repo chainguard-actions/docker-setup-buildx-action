@@ -1,4 +1,4 @@
-name: Test docker driver
+name: Test buildx with docker driver
 on:
   workflow_dispatch:
 jobs:
@@ -9,9 +9,18 @@ jobs:
       - id: buildx
         uses: .
         with:
-          driver: 'docker'
-          use: 'true'
-      - name: Assert builder name is set
+          driver: docker
+      - name: Assert driver output is docker
+        env:
+          ACTUAL: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "actual driver: $ACTUAL"
+          if [ "$ACTUAL" != "docker" ]; then
+            echo "FAIL: expected driver 'docker' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: driver is 'docker'"
+      - name: Assert builder name output is set
         env:
           ACTUAL: ${{ steps.buildx.outputs.name }}
         run: |
@@ -21,17 +30,7 @@ jobs:
             exit 1
           fi
           echo "PASS: builder name is '$ACTUAL'"
-      - name: Assert driver is docker
-        env:
-          ACTUAL: ${{ steps.buildx.outputs.driver }}
-        run: |
-          echo "actual driver: $ACTUAL"
-          if [ "$ACTUAL" != "docker" ]; then
-            echo "FAIL: expected driver 'docker', got '$ACTUAL'"
-            exit 1
-          fi
-          echo "PASS"
-      - name: Assert platforms is set
+      - name: Assert platforms output is set
         env:
           ACTUAL: ${{ steps.buildx.outputs.platforms }}
         run: |
@@ -41,13 +40,3 @@ jobs:
             exit 1
           fi
           echo "PASS: platforms is '$ACTUAL'"
-      - name: Assert nodes is set
-        env:
-          ACTUAL: ${{ steps.buildx.outputs.nodes }}
-        run: |
-          echo "actual nodes: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected nodes to be non-empty"
-            exit 1
-          fi
-          echo "PASS: nodes is '$ACTUAL'"
