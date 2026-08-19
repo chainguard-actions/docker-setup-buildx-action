@@ -1,0 +1,34 @@
+name: Test custom builder name
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          driver: 'docker-container'
+          name: 'my-custom-builder'
+          use: 'true'
+          cache-binary: 'false'
+      - name: Assert builder name matches custom name
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "builder name: $BUILDER_NAME"
+          if [ "$BUILDER_NAME" != "my-custom-builder" ]; then
+            echo "FAIL: expected builder name to be 'my-custom-builder', got '$BUILDER_NAME'"
+            exit 1
+          fi
+          echo "PASS: builder name is 'my-custom-builder'"
+      - name: Assert builder is listed in docker buildx ls
+        run: |
+          echo "Listing builders:"
+          docker buildx ls
+          if ! docker buildx ls | grep -q "my-custom-builder"; then
+            echo "FAIL: 'my-custom-builder' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: 'my-custom-builder' found in builder list"

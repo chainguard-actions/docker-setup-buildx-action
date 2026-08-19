@@ -1,0 +1,54 @@
+name: Test docker driver
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          driver: 'docker'
+          use: 'true'
+          cache-binary: 'false'
+      - name: Assert builder name output is set
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS: builder name is '$BUILDER_NAME'"
+      - name: Assert driver output is docker
+        env:
+          DRIVER: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "driver: $DRIVER"
+          if [ "$DRIVER" != "docker" ]; then
+            echo "FAIL: expected driver to be 'docker', got '$DRIVER'"
+            exit 1
+          fi
+          echo "PASS: driver is 'docker'"
+      - name: Assert platforms output is set
+        env:
+          PLATFORMS: ${{ steps.buildx.outputs.platforms }}
+        run: |
+          echo "platforms: $PLATFORMS"
+          if [ -z "$PLATFORMS" ]; then
+            echo "FAIL: expected platforms to be set"
+            exit 1
+          fi
+          echo "PASS: platforms is '$PLATFORMS'"
+      - name: Assert nodes output is set
+        env:
+          NODES: ${{ steps.buildx.outputs.nodes }}
+        run: |
+          echo "nodes: $NODES"
+          if [ -z "$NODES" ]; then
+            echo "FAIL: expected nodes to be set"
+            exit 1
+          fi
+          echo "PASS: nodes output is set"

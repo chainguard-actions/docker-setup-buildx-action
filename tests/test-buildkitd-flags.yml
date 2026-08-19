@@ -1,0 +1,26 @@
+name: Test buildkitd-flags input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          driver: 'docker-container'
+          buildkitd-flags: '--allow-insecure-entitlement security.insecure'
+          use: 'true'
+      - name: Assert builder name output is set
+        env:
+          BUILDER_NAME: ${{ steps.action.outputs.name }}
+          BUILDER_DRIVER: ${{ steps.action.outputs.driver }}
+        run: |
+          echo "builder name: $BUILDER_NAME"
+          echo "builder driver: $BUILDER_DRIVER"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS: builder name is '$BUILDER_NAME'"

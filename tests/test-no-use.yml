@@ -1,0 +1,50 @@
+name: Test use=false does not switch builder
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Record current builder before action
+        id: before
+        run: |
+          CURRENT=$(docker buildx ls | grep '\*' | awk '{print $1}' | tr -d '*' || echo "default")
+          echo "current=$CURRENT"
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+      - id: buildx
+        uses: .
+        with:
+          driver: 'docker-container'
+          use: 'false'
+          cache-binary: 'false'
+      - name: Assert builder name output is set
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS: builder name is '$BUILDER_NAME'"
+      - name: Assert driver output is set
+        env:
+          DRIVER: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "driver: $DRIVER"
+          if [ -z "$DRIVER" ]; then
+            echo "FAIL: expected driver output to be set"
+            exit 1
+          fi
+          echo "PASS: driver is '$DRIVER'"
+      - name: Assert nodes output is set
+        env:
+          NODES: ${{ steps.buildx.outputs.nodes }}
+        run: |
+          echo "nodes: $NODES"
+          if [ -z "$NODES" ]; then
+            echo "FAIL: expected nodes output to be set"
+            exit 1
+          fi
+          echo "PASS: nodes output is set"
