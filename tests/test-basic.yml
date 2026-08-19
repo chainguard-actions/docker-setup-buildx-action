@@ -1,4 +1,4 @@
-name: Test basic usage with version and name
+name: Test basic buildx setup
 on:
   workflow_dispatch:
 jobs:
@@ -8,38 +8,54 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: buildx
         uses: .
-        with:
-          version: latest
-          name: my-test-builder
-          use: 'true'
-          cleanup: 'true'
       - name: Assert builder name output is set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.name }}
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
         run: |
-          echo "actual name: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected builder name to be non-empty"
+          echo "builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder name is $ACTUAL"
+          echo "PASS: builder name is '$BUILDER_NAME'"
       - name: Assert driver output is set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.driver }}
+          DRIVER: ${{ steps.buildx.outputs.driver }}
         run: |
-          echo "actual driver: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected driver to be non-empty"
+          echo "driver: $DRIVER"
+          if [ -z "$DRIVER" ]; then
+            echo "FAIL: expected driver to be set"
             exit 1
           fi
-          echo "PASS: driver is $ACTUAL"
-      - name: Assert status output is set
+          echo "PASS: driver is '$DRIVER'"
+      - name: Assert platforms output is set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.status }}
+          PLATFORMS: ${{ steps.buildx.outputs.platforms }}
         run: |
-          echo "actual status: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected status to be non-empty"
+          echo "platforms: $PLATFORMS"
+          if [ -z "$PLATFORMS" ]; then
+            echo "FAIL: expected platforms to be set"
             exit 1
           fi
-          echo "PASS: status is $ACTUAL"
+          echo "PASS: platforms is '$PLATFORMS'"
+      - name: Assert nodes output is set
+        env:
+          NODES: ${{ steps.buildx.outputs.nodes }}
+        run: |
+          echo "nodes: $NODES"
+          if [ -z "$NODES" ]; then
+            echo "FAIL: expected nodes to be set"
+            exit 1
+          fi
+          echo "PASS: nodes is set"
+      - name: Assert builder is active via docker buildx ls
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "Checking docker buildx ls for builder: $BUILDER_NAME"
+          docker buildx ls
+          if ! docker buildx ls | grep -q "$BUILDER_NAME"; then
+            echo "FAIL: builder '$BUILDER_NAME' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: builder '$BUILDER_NAME' found in docker buildx ls"

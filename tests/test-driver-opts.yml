@@ -1,4 +1,4 @@
-name: Test version input
+name: Test driver-opts input
 on:
   workflow_dispatch:
 jobs:
@@ -9,7 +9,8 @@ jobs:
       - id: action
         uses: .
         with:
-          version: 'latest'
+          driver: 'docker-container'
+          driver-opts: 'network=host'
           use: 'true'
       - name: Assert builder name output is set
         env:

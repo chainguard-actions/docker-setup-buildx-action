@@ -1,4 +1,4 @@
-name: Test version input
+name: Test buildkitd-flags input
 on:
   workflow_dispatch:
 jobs:
@@ -9,7 +9,8 @@ jobs:
       - id: action
         uses: .
         with:
-          version: 'latest'
+          driver: 'docker-container'
+          buildkitd-flags: '--allow-insecure-entitlement security.insecure'
           use: 'true'
       - name: Assert builder name output is set
         env:

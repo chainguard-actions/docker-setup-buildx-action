@@ -1,4 +1,4 @@
-name: Test version input
+name: Test endpoint input
 on:
   workflow_dispatch:
 jobs:
@@ -9,15 +9,16 @@ jobs:
       - id: action
         uses: .
         with:
-          version: 'latest'
+          driver: 'docker-container'
+          endpoint: 'unix:///var/run/docker.sock'
           use: 'true'
       - name: Assert builder name output is set
         env:
           BUILDER_NAME: ${{ steps.action.outputs.name }}
-          BUILDER_DRIVER: ${{ steps.action.outputs.driver }}
+          BUILDER_ENDPOINT: ${{ steps.action.outputs.endpoint }}
         run: |
           echo "builder name: $BUILDER_NAME"
-          echo "builder driver: $BUILDER_DRIVER"
+          echo "builder endpoint: $BUILDER_ENDPOINT"
           if [ -z "$BUILDER_NAME" ]; then
             echo "FAIL: expected builder name to be set"
             exit 1

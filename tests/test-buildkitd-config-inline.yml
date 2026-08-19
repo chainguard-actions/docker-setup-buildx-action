@@ -1,4 +1,4 @@
-name: Test buildkitd-flags and buildkitd-config-inline inputs
+name: Test buildx setup with inline buildkitd config
 on:
   workflow_dispatch:
 jobs:
@@ -9,30 +9,46 @@ jobs:
       - id: buildx
         uses: .
         with:
-          driver: docker-container
-          buildkitd-flags: '--debug'
+          name: buildkitd-config-builder
           buildkitd-config-inline: |
             [worker.oci]
-              max-parallelism = 4
-          use: 'true'
-          cleanup: 'true'
+              max-parallelism = 2
       - name: Assert builder name output is set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.name }}
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
         run: |
-          echo "actual name: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected builder name to be non-empty"
+          echo "builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder name is $ACTUAL"
+          echo "PASS: builder name is '$BUILDER_NAME'"
       - name: Assert driver output is set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.driver }}
+          DRIVER: ${{ steps.buildx.outputs.driver }}
         run: |
-          echo "actual driver: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected driver to be non-empty"
+          echo "driver: $DRIVER"
+          if [ -z "$DRIVER" ]; then
+            echo "FAIL: expected driver to be set"
             exit 1
           fi
-          echo "PASS: driver is $ACTUAL"
+          echo "PASS: driver is '$DRIVER'"
+      - name: Assert platforms output is set
+        env:
+          PLATFORMS: ${{ steps.buildx.outputs.platforms }}
+        run: |
+          echo "platforms: $PLATFORMS"
+          if [ -z "$PLATFORMS" ]; then
+            echo "FAIL: expected platforms to be set"
+            exit 1
+          fi
+          echo "PASS: platforms is '$PLATFORMS'"
+      - name: Assert builder is listed
+        run: |
+          echo "Checking docker buildx ls"
+          docker buildx ls
+          if ! docker buildx ls | grep -q "buildkitd-config-builder"; then
+            echo "FAIL: builder 'buildkitd-config-builder' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: builder 'buildkitd-config-builder' found in docker buildx ls"

@@ -1,0 +1,38 @@
+name: Test buildx setup with use=false
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          name: inactive-builder
+          use: 'false'
+      - name: Assert builder name output is set
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS: builder name is '$BUILDER_NAME'"
+      - name: Assert builder exists but is not current
+        run: |
+          echo "Checking docker buildx ls"
+          docker buildx ls
+          if ! docker buildx ls | grep -q "inactive-builder"; then
+            echo "FAIL: builder 'inactive-builder' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: builder 'inactive-builder' found in docker buildx ls"
+          # Verify it is NOT the current builder (no asterisk on that line)
+          if docker buildx ls | grep "inactive-builder" | grep -q '\*'; then
+            echo "FAIL: builder 'inactive-builder' should not be the current builder"
+            exit 1
+          fi
+          echo "PASS: builder 'inactive-builder' is not the current builder"

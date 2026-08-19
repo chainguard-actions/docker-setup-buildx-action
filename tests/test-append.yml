@@ -7,39 +7,37 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Create initial builder
-        id: buildx-initial
+        id: builder
         uses: .
         with:
-          name: append-test-builder
-          driver: docker-container
+          name: 'test-append-builder'
+          driver: 'docker-container'
           use: 'true'
-          cleanup: 'false'
-      - name: Assert initial builder name
+      - name: Assert initial builder created
         env:
-          ACTUAL: ${{ steps.buildx-initial.outputs.name }}
+          BUILDER_NAME: ${{ steps.builder.outputs.name }}
         run: |
-          echo "actual name: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected builder name to be non-empty"
+          echo "builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder name is $ACTUAL"
-      - name: Append node to builder
-        id: buildx-append
+          echo "PASS: initial builder created"
+      - id: action
         uses: .
         with:
-          name: append-test-builder
+          name: 'test-append-builder'
+          driver: 'docker-container'
           append: |
             - endpoint: unix:///var/run/docker.sock
           use: 'true'
-          cleanup: 'true'
-      - name: Assert appended builder name
+      - name: Assert builder name output is set after append
         env:
-          ACTUAL: ${{ steps.buildx-append.outputs.name }}
+          BUILDER_NAME: ${{ steps.action.outputs.name }}
         run: |
-          echo "actual name: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected builder name to be non-empty"
+          echo "builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder name is $ACTUAL"
+          echo "PASS"

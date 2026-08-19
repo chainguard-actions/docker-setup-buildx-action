@@ -1,0 +1,51 @@
+name: Test buildx setup with custom name
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: buildx
+        uses: .
+        with:
+          name: my-test-builder
+          use: 'true'
+      - name: Assert builder name matches custom name
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "builder name: $BUILDER_NAME"
+          if [ "$BUILDER_NAME" != "my-test-builder" ]; then
+            echo "FAIL: expected builder name 'my-test-builder', got '$BUILDER_NAME'"
+            exit 1
+          fi
+          echo "PASS: builder name is 'my-test-builder'"
+      - name: Assert driver output is set
+        env:
+          DRIVER: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "driver: $DRIVER"
+          if [ -z "$DRIVER" ]; then
+            echo "FAIL: expected driver to be set"
+            exit 1
+          fi
+          echo "PASS: driver is '$DRIVER'"
+      - name: Assert builder is active via docker buildx ls
+        run: |
+          echo "Checking docker buildx ls for builder: my-test-builder"
+          docker buildx ls
+          if ! docker buildx ls | grep -q "my-test-builder"; then
+            echo "FAIL: builder 'my-test-builder' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: builder 'my-test-builder' found in docker buildx ls"
+      - name: Assert builder is current (use=true)
+        run: |
+          CURRENT=$(docker buildx ls | grep '\*' | awk '{print $1}' | tr -d '*')
+          echo "current builder: $CURRENT"
+          if [ "$CURRENT" != "my-test-builder" ]; then
+            echo "FAIL: expected current builder to be 'my-test-builder', got '$CURRENT'"
+            exit 1
+          fi
+          echo "PASS: current builder is 'my-test-builder'"

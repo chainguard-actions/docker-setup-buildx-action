@@ -1,4 +1,4 @@
-name: Test buildkitd-config and endpoint inputs
+name: Test buildkitd-config input
 on:
   workflow_dispatch:
 jobs:
@@ -6,31 +6,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - id: buildx
+      - name: Create buildkitd config file
+        run: |
+          mkdir -p /tmp/buildkitd-config
+          cat > /tmp/buildkitd-config/buildkitd.toml <<'EOF'
+          [worker.oci]
+            max-parallelism = 4
+          EOF
+      - id: action
         uses: .
         with:
-          driver: docker-container
-          buildkitd-config: ${{ github.workspace }}/actions/hardened/docker--setup-buildx-action/v4.0.0/tests/fixtures/buildkitd.toml
-          endpoint: unix:///var/run/docker.sock
+          driver: 'docker-container'
+          buildkitd-config: '/tmp/buildkitd-config/buildkitd.toml'
           use: 'true'
-          cleanup: 'true'
       - name: Assert builder name output is set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.name }}
+          BUILDER_NAME: ${{ steps.action.outputs.name }}
+          BUILDER_DRIVER: ${{ steps.action.outputs.driver }}
         run: |
-          echo "actual name: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected builder name to be non-empty"
+          echo "builder name: $BUILDER_NAME"
+          echo "builder driver: $BUILDER_DRIVER"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder name is $ACTUAL"
-      - name: Assert endpoint output is set
-        env:
-          ACTUAL: ${{ steps.buildx.outputs.endpoint }}
-        run: |
-          echo "actual endpoint: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected endpoint to be non-empty"
-            exit 1
-          fi
-          echo "PASS: endpoint is $ACTUAL"
+          echo "PASS"

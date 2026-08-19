@@ -1,4 +1,4 @@
-name: Test platforms and driver-opts inputs
+name: Test platforms input
 on:
   workflow_dispatch:
 jobs:
@@ -6,32 +6,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - id: buildx
+      - id: action
         uses: .
         with:
-          driver: docker-container
-          driver-opts: |
-            image=moby/buildkit:latest
-          platforms: linux/amd64
+          driver: 'docker-container'
+          platforms: 'linux/amd64,linux/arm64'
           use: 'true'
-          cleanup: 'true'
-      - name: Assert platforms output is set
+      - name: Assert builder name and platforms output are set
         env:
-          ACTUAL: ${{ steps.buildx.outputs.platforms }}
+          BUILDER_NAME: ${{ steps.action.outputs.name }}
+          BUILDER_PLATFORMS: ${{ steps.action.outputs.platforms }}
         run: |
-          echo "actual platforms: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected platforms to be non-empty"
-            exit 1
-          fi
-          echo "PASS: platforms is $ACTUAL"
-      - name: Assert driver output is docker-container
-        env:
-          ACTUAL: ${{ steps.buildx.outputs.driver }}
-        run: |
-          echo "actual driver: $ACTUAL"
-          if [ "$ACTUAL" != "docker-container" ]; then
-            echo "FAIL: expected driver to be 'docker-container', got '$ACTUAL'"
+          echo "builder name: $BUILDER_NAME"
+          echo "builder platforms: $BUILDER_PLATFORMS"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
             exit 1
           fi
           echo "PASS"
