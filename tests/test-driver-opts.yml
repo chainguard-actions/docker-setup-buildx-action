@@ -1,4 +1,4 @@
-name: Test buildkitd-flags input
+name: Test driver-opts input
 on:
   workflow_dispatch:
 jobs:
@@ -10,7 +10,7 @@ jobs:
         uses: .
         with:
           driver: 'docker-container'
-          buildkitd-flags: '--debug'
+          driver-opts: 'network=host'
           use: 'true'
       - name: Assert builder name output is set
         env:
@@ -23,4 +23,8 @@ jobs:
             echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder '$BUILDER_NAME' created with buildkitd-flags"
+          if [ "$BUILDER_DRIVER" != "docker-container" ]; then
+            echo "FAIL: expected driver to be 'docker-container', got '$BUILDER_DRIVER'"
+            exit 1
+          fi
+          echo "PASS: builder '$BUILDER_NAME' with driver '$BUILDER_DRIVER'"

@@ -1,4 +1,4 @@
-name: Test buildkitd-flags input
+name: Test version input
 on:
   workflow_dispatch:
 jobs:
@@ -9,8 +9,7 @@ jobs:
       - id: action
         uses: .
         with:
-          driver: 'docker-container'
-          buildkitd-flags: '--debug'
+          version: 'latest'
           use: 'true'
       - name: Assert builder name output is set
         env:
@@ -23,4 +22,8 @@ jobs:
             echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder '$BUILDER_NAME' created with buildkitd-flags"
+          echo "PASS: builder name is '$BUILDER_NAME'"
+      - name: Assert buildx is available
+        run: |
+          docker buildx version
+          echo "PASS: buildx is available"

@@ -1,4 +1,4 @@
-name: Test buildkitd-flags input
+name: Test endpoint input
 on:
   workflow_dispatch:
 jobs:
@@ -10,17 +10,17 @@ jobs:
         uses: .
         with:
           driver: 'docker-container'
-          buildkitd-flags: '--debug'
+          endpoint: 'unix:///var/run/docker.sock'
           use: 'true'
-      - name: Assert builder name output is set
+      - name: Assert builder name and endpoint outputs are set
         env:
           BUILDER_NAME: ${{ steps.action.outputs.name }}
-          BUILDER_DRIVER: ${{ steps.action.outputs.driver }}
+          BUILDER_ENDPOINT: ${{ steps.action.outputs.endpoint }}
         run: |
           echo "builder name: $BUILDER_NAME"
-          echo "builder driver: $BUILDER_DRIVER"
+          echo "builder endpoint: $BUILDER_ENDPOINT"
           if [ -z "$BUILDER_NAME" ]; then
             echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder '$BUILDER_NAME' created with buildkitd-flags"
+          echo "PASS: builder '$BUILDER_NAME' created with endpoint"

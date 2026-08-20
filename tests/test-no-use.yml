@@ -1,0 +1,57 @@
+name: Test use=false (do not switch to new builder)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Record default builder before action
+        id: before
+        run: |
+          DEFAULT=$(docker buildx ls | grep '\*' | awk '{print $1}' | tr -d '*' || echo "default")
+          echo "default_builder=$DEFAULT" >> "$GITHUB_OUTPUT"
+          echo "Default builder before: $DEFAULT"
+      - id: buildx
+        uses: .
+        with:
+          name: 'no-use-builder'
+          use: 'false'
+      - name: Assert name output is set
+        env:
+          NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "name: $NAME"
+          if [ -z "$NAME" ]; then
+            echo "FAIL: expected name output to be non-empty"
+            exit 1
+          fi
+          echo "PASS: name=$NAME"
+      - name: Assert driver output is set
+        env:
+          DRIVER: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "driver: $DRIVER"
+          if [ -z "$DRIVER" ]; then
+            echo "FAIL: expected driver output to be non-empty"
+            exit 1
+          fi
+          echo "PASS: driver=$DRIVER"
+      - name: Assert builder was created but not set as active
+        run: |
+          echo "Listing builders..."
+          docker buildx ls
+          # The builder should exist
+          if ! docker buildx ls | grep -q "no-use-builder"; then
+            echo "FAIL: builder 'no-use-builder' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: builder 'no-use-builder' exists"
+          # The builder should NOT be marked as active (no asterisk next to it)
+          ACTIVE_LINE=$(docker buildx ls | grep '\*' | head -1 || echo "")
+          echo "Active builder line: $ACTIVE_LINE"
+          if echo "$ACTIVE_LINE" | grep -q "no-use-builder"; then
+            echo "FAIL: 'no-use-builder' should not be the active builder when use=false"
+            exit 1
+          fi
+          echo "PASS: 'no-use-builder' is not the active builder"

@@ -1,0 +1,40 @@
+name: Test append input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create initial builder
+        id: initial-builder
+        uses: .
+        with:
+          driver: 'docker-container'
+          use: 'true'
+      - name: Get initial builder name
+        id: get-name
+        env:
+          BUILDER_NAME: ${{ steps.initial-builder.outputs.name }}
+        run: |
+          echo "Initial builder name: $BUILDER_NAME"
+          echo "name=$BUILDER_NAME" >> $GITHUB_OUTPUT
+      - id: action
+        uses: .
+        with:
+          name: ${{ steps.get-name.outputs.name }}
+          append: |
+            - endpoint: unix:///var/run/docker.sock
+              platforms: linux/amd64
+      - name: Assert builder outputs are set
+        env:
+          BUILDER_NAME: ${{ steps.action.outputs.name }}
+          BUILDER_NODES: ${{ steps.action.outputs.nodes }}
+        run: |
+          echo "builder name: $BUILDER_NAME"
+          echo "builder nodes: $BUILDER_NODES"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS: builder '$BUILDER_NAME' with append"
