@@ -9,18 +9,18 @@ jobs:
       - id: action
         uses: .
         with:
-          driver: 'docker-container'
-          platforms: 'linux/amd64,linux/arm64'
+          driver: docker-container
+          platforms: linux/amd64,linux/arm64
           use: 'true'
       - name: Assert builder name and platforms output are set
         env:
-          BUILDER_NAME: ${{ steps.action.outputs.name }}
-          BUILDER_PLATFORMS: ${{ steps.action.outputs.platforms }}
+          NAME: ${{ steps.action.outputs.name }}
+          PLATFORMS: ${{ steps.action.outputs.platforms }}
         run: |
-          echo "builder name: $BUILDER_NAME"
-          echo "builder platforms: $BUILDER_PLATFORMS"
-          if [ -z "$BUILDER_NAME" ]; then
+          echo "name: $NAME"
+          echo "platforms: $PLATFORMS"
+          if [ -z "$NAME" ]; then
             echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder name is '$BUILDER_NAME'"
+          echo "PASS"
