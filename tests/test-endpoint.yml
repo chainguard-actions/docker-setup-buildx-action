@@ -9,18 +9,25 @@ jobs:
       - id: action
         uses: .
         with:
-          driver: 'docker-container'
           endpoint: 'unix:///var/run/docker.sock'
           use: 'true'
       - name: Assert builder name output is set
         env:
           BUILDER_NAME: ${{ steps.action.outputs.name }}
-          BUILDER_ENDPOINT: ${{ steps.action.outputs.endpoint }}
         run: |
           echo "builder name: $BUILDER_NAME"
-          echo "builder endpoint: $BUILDER_ENDPOINT"
           if [ -z "$BUILDER_NAME" ]; then
             echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert endpoint output is set
+        env:
+          ENDPOINT: ${{ steps.action.outputs.endpoint }}
+        run: |
+          echo "endpoint: $ENDPOINT"
+          if [ -z "$ENDPOINT" ]; then
+            echo "FAIL: expected endpoint output to be set"
             exit 1
           fi
           echo "PASS"

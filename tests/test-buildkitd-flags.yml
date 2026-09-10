@@ -9,18 +9,25 @@ jobs:
       - id: action
         uses: .
         with:
-          driver: 'docker-container'
-          buildkitd-flags: '--allow-insecure-entitlement security.insecure'
+          buildkitd-flags: '--debug'
           use: 'true'
       - name: Assert builder name output is set
         env:
           BUILDER_NAME: ${{ steps.action.outputs.name }}
-          BUILDER_DRIVER: ${{ steps.action.outputs.driver }}
         run: |
           echo "builder name: $BUILDER_NAME"
-          echo "builder driver: $BUILDER_DRIVER"
           if [ -z "$BUILDER_NAME" ]; then
             echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert platforms output is set
+        env:
+          PLATFORMS: ${{ steps.action.outputs.platforms }}
+        run: |
+          echo "platforms: $PLATFORMS"
+          if [ -z "$PLATFORMS" ]; then
+            echo "FAIL: expected platforms to be set"
             exit 1
           fi
           echo "PASS"

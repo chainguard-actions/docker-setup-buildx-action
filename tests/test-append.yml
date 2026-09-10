@@ -7,29 +7,28 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Create initial builder
-        id: builder
+        id: initial-builder
         uses: .
         with:
           name: 'test-append-builder'
-          driver: 'docker-container'
           use: 'true'
-      - name: Assert initial builder created
+      - name: Assert initial builder name output is set
         env:
-          BUILDER_NAME: ${{ steps.builder.outputs.name }}
+          BUILDER_NAME: ${{ steps.initial-builder.outputs.name }}
         run: |
           echo "builder name: $BUILDER_NAME"
           if [ -z "$BUILDER_NAME" ]; then
             echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: initial builder created"
+          echo "PASS"
       - id: action
         uses: .
         with:
           name: 'test-append-builder'
-          driver: 'docker-container'
           append: |
             - endpoint: unix:///var/run/docker.sock
+              platforms: linux/amd64
           use: 'true'
       - name: Assert builder name output is set after append
         env:
@@ -37,7 +36,7 @@ jobs:
         run: |
           echo "builder name: $BUILDER_NAME"
           if [ -z "$BUILDER_NAME" ]; then
-            echo "FAIL: expected builder name to be set"
+            echo "FAIL: expected builder name to be set after append"
             exit 1
           fi
           echo "PASS"
