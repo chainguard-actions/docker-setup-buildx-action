@@ -9,18 +9,18 @@ jobs:
       - id: action
         uses: .
         with:
-          driver: 'docker-container'
-          buildkitd-flags: '--debug'
+          driver: docker-container
+          buildkitd-flags: '--allow-insecure-entitlement security.insecure'
           use: 'true'
       - name: Assert builder name output is set
         env:
-          BUILDER_NAME: ${{ steps.action.outputs.name }}
-          BUILDER_DRIVER: ${{ steps.action.outputs.driver }}
+          NAME: ${{ steps.action.outputs.name }}
+          DRIVER: ${{ steps.action.outputs.driver }}
         run: |
-          echo "builder name: $BUILDER_NAME"
-          echo "builder driver: $BUILDER_DRIVER"
-          if [ -z "$BUILDER_NAME" ]; then
+          echo "name: $NAME"
+          echo "driver: $DRIVER"
+          if [ -z "$NAME" ]; then
             echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS: builder '$BUILDER_NAME' created with buildkitd-flags"
+          echo "PASS"
