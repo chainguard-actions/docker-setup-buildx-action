@@ -12,16 +12,16 @@ jobs:
         with:
           name: 'test-append-builder'
           use: 'true'
-      - name: Assert initial builder name output is set
+      - name: Assert initial builder created
         env:
-          ACTUAL: ${{ steps.initial.outputs.name }}
+          BUILDER_NAME: ${{ steps.initial.outputs.name }}
         run: |
-          echo "actual: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected builder name to be set"
+          echo "initial builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected initial builder name to be set"
             exit 1
           fi
-          echo "PASS"
+          echo "PASS: initial builder created"
       - id: action
         uses: .
         with:
@@ -29,12 +29,14 @@ jobs:
           append: |
             - endpoint: unix:///var/run/docker.sock
           use: 'true'
-      - name: Assert builder name output is set
+      - name: Assert builder name output is set after append
         env:
-          ACTUAL: ${{ steps.action.outputs.name }}
+          BUILDER_NAME: ${{ steps.action.outputs.name }}
+          BUILDER_NODES: ${{ steps.action.outputs.nodes }}
         run: |
-          echo "actual: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
+          echo "builder name: $BUILDER_NAME"
+          echo "builder nodes: $BUILDER_NODES"
+          if [ -z "$BUILDER_NAME" ]; then
             echo "FAIL: expected builder name to be set"
             exit 1
           fi

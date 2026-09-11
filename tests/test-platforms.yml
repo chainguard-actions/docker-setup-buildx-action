@@ -11,23 +11,19 @@ jobs:
         with:
           platforms: 'linux/amd64,linux/arm64'
           use: 'true'
-      - name: Assert builder name output is set
+      - name: Assert builder platforms output is set
         env:
-          ACTUAL: ${{ steps.action.outputs.name }}
+          BUILDER_NAME: ${{ steps.action.outputs.name }}
+          BUILDER_PLATFORMS: ${{ steps.action.outputs.platforms }}
         run: |
-          echo "actual: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
+          echo "builder name: $BUILDER_NAME"
+          echo "builder platforms: $BUILDER_PLATFORMS"
+          if [ -z "$BUILDER_NAME" ]; then
             echo "FAIL: expected builder name to be set"
             exit 1
           fi
-          echo "PASS"
-      - name: Assert platforms output is set
-        env:
-          ACTUAL: ${{ steps.action.outputs.platforms }}
-        run: |
-          echo "actual: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected platforms to be set"
+          if [ -z "$BUILDER_PLATFORMS" ]; then
+            echo "FAIL: expected builder platforms to be set"
             exit 1
           fi
           echo "PASS"

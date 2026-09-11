@@ -15,21 +15,13 @@ jobs:
           use: 'true'
       - name: Assert builder name output is set
         env:
-          ACTUAL: ${{ steps.action.outputs.name }}
+          BUILDER_NAME: ${{ steps.action.outputs.name }}
+          BUILDER_DRIVER: ${{ steps.action.outputs.driver }}
         run: |
-          echo "actual: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
+          echo "builder name: $BUILDER_NAME"
+          echo "builder driver: $BUILDER_DRIVER"
+          if [ -z "$BUILDER_NAME" ]; then
             echo "FAIL: expected builder name to be set"
-            exit 1
-          fi
-          echo "PASS"
-      - name: Assert driver output is set
-        env:
-          ACTUAL: ${{ steps.action.outputs.driver }}
-        run: |
-          echo "actual: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected driver to be set"
             exit 1
           fi
           echo "PASS"
