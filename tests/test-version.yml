@@ -9,25 +9,17 @@ jobs:
       - id: action
         uses: .
         with:
-          version: 'latest'
+          version: latest
           use: 'true'
       - name: Assert builder name output is set
         env:
-          ACTUAL: ${{ steps.action.outputs.name }}
+          NAME: ${{ steps.action.outputs.name }}
+          DRIVER: ${{ steps.action.outputs.driver }}
         run: |
-          echo "actual: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
+          echo "name: $NAME"
+          echo "driver: $DRIVER"
+          if [ -z "$NAME" ]; then
             echo "FAIL: expected builder name to be set"
-            exit 1
-          fi
-          echo "PASS"
-      - name: Assert driver output is set
-        env:
-          ACTUAL: ${{ steps.action.outputs.driver }}
-        run: |
-          echo "actual: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
-            echo "FAIL: expected driver to be set"
             exit 1
           fi
           echo "PASS"

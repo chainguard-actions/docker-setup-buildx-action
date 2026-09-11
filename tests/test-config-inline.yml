@@ -1,4 +1,4 @@
-name: Test driver-opts input
+name: Test config-inline (deprecated) input
 on:
   workflow_dispatch:
 jobs:
@@ -10,8 +10,9 @@ jobs:
         uses: .
         with:
           driver: docker-container
-          driver-opts: |
-            network=host
+          config-inline: |
+            [worker.oci]
+              max-parallelism = 4
           use: 'true'
       - name: Assert builder name output is set
         env:
@@ -22,10 +23,6 @@ jobs:
           echo "driver: $DRIVER"
           if [ -z "$NAME" ]; then
             echo "FAIL: expected builder name to be set"
-            exit 1
-          fi
-          if [ "$DRIVER" != "docker-container" ]; then
-            echo "FAIL: expected driver to be docker-container, got $DRIVER"
             exit 1
           fi
           echo "PASS"

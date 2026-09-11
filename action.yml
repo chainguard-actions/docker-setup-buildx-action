@@ -86,7 +86,6 @@ outputs:
     description: 'Builder node flags (deprecated, use nodes output instead)'
 
 runs:
-  pre: chainguard-phonehome.js
   using: 'node20'
   main: 'dist/index.js'
   post: 'dist/index.js'

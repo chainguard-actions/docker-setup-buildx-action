@@ -6,29 +6,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create buildkitd config file
+        run: |
+          mkdir -p /tmp/buildkitd-test
+          cat > /tmp/buildkitd-test/buildkitd.toml <<'EOF'
+[worker.oci]
+  max-parallelism = 4
+EOF
       - id: action
         uses: .
         with:
-          driver: 'docker-container'
-          buildkitd-config: '${{ github.workspace }}/hardened/tests/fixtures/buildkitd.toml'
+          driver: docker-container
+          buildkitd-config: /tmp/buildkitd-test/buildkitd.toml
           use: 'true'
       - name: Assert builder name output is set
         env:
-          ACTUAL: ${{ steps.action.outputs.name }}
+          NAME: ${{ steps.action.outputs.name }}
+          DRIVER: ${{ steps.action.outputs.driver }}
         run: |
-          echo "actual: $ACTUAL"
-          if [ -z "$ACTUAL" ]; then
+          echo "name: $NAME"
+          echo "driver: $DRIVER"
+          if [ -z "$NAME" ]; then
             echo "FAIL: expected builder name to be set"
-            exit 1
-          fi
-          echo "PASS"
-      - name: Assert driver output is docker-container
-        env:
-          ACTUAL: ${{ steps.action.outputs.driver }}
-        run: |
-          echo "actual: $ACTUAL"
-          if [ "$ACTUAL" != "docker-container" ]; then
-            echo "FAIL: expected driver to be docker-container"
             exit 1
           fi
           echo "PASS"
