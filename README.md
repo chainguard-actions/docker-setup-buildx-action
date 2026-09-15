@@ -13,6 +13,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v4.1.0 | [`v4.1.0`](https://github.com/chainguard-actions/docker-setup-buildx-action/tree/v4.1.0) | [`d7f5e7f`](https://github.com/docker/setup-buildx-action/commit/d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5) |
 | v4.2.0 | [`v4.2.0`](https://github.com/chainguard-actions/docker-setup-buildx-action/tree/v4.2.0) | [`bb05f3f`](https://github.com/docker/setup-buildx-action/commit/bb05f3f5519dd87d3ba754cc423b652a5edd6d2c) |
 | v4.3.0 | [`v4.3.0`](https://github.com/chainguard-actions/docker-setup-buildx-action/tree/v4.3.0) | [`37fe631`](https://github.com/docker/setup-buildx-action/commit/37fe631027851001ddb9b187196cc803df7f5f0e) |
+| v4.4.0 | [`v4.4.0`](https://github.com/chainguard-actions/docker-setup-buildx-action/tree/v4.4.0) | [`594f3bf`](https://github.com/docker/setup-buildx-action/commit/594f3bf4285d9ea8dc53c9a0c9c4092420091003) |
 
 ## Privacy
 
