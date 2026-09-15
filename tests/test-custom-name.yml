@@ -1,0 +1,42 @@
+name: Test custom builder name
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          name: 'my-test-builder'
+          use: 'true'
+      - name: Assert builder name matches custom name
+        env:
+          NAME: ${{ steps.action.outputs.name }}
+        run: |
+          echo "name: $NAME"
+          if [ "$NAME" != "my-test-builder" ]; then
+            echo "FAIL: expected builder name to be 'my-test-builder', got '$NAME'"
+            exit 1
+          fi
+          echo "PASS: builder name is 'my-test-builder'"
+      - name: Assert driver output is set
+        env:
+          DRIVER: ${{ steps.action.outputs.driver }}
+        run: |
+          echo "driver: $DRIVER"
+          if [ -z "$DRIVER" ]; then
+            echo "FAIL: expected driver output to be set"
+            exit 1
+          fi
+          echo "PASS: driver is '$DRIVER'"
+      - name: Assert builder exists in docker buildx ls
+        run: |
+          echo "Checking docker buildx ls..."
+          docker buildx ls
+          if ! docker buildx ls | grep -q "my-test-builder"; then
+            echo "FAIL: builder 'my-test-builder' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: builder 'my-test-builder' found in docker buildx ls"

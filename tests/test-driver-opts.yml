@@ -1,0 +1,31 @@
+name: Test driver-opts input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          driver: 'docker-container'
+          driver-opts: |
+            network=host
+          use: 'true'
+      - name: Assert builder name output is set
+        env:
+          BUILDER_NAME: ${{ steps.action.outputs.name }}
+          BUILDER_DRIVER: ${{ steps.action.outputs.driver }}
+        run: |
+          echo "name: $BUILDER_NAME"
+          echo "driver: $BUILDER_DRIVER"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          if [ "$BUILDER_DRIVER" != "docker-container" ]; then
+            echo "FAIL: expected driver 'docker-container' but got '$BUILDER_DRIVER'"
+            exit 1
+          fi
+          echo "PASS: builder '$BUILDER_NAME' with driver '$BUILDER_DRIVER'"

@@ -1,0 +1,51 @@
+name: Test builder created but not set as current (use=false)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          name: 'no-use-builder'
+          use: 'false'
+      - name: Assert builder name output is set
+        env:
+          NAME: ${{ steps.action.outputs.name }}
+        run: |
+          echo "name: $NAME"
+          if [ -z "$NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS: builder name is '$NAME'"
+      - name: Assert driver output is set
+        env:
+          DRIVER: ${{ steps.action.outputs.driver }}
+        run: |
+          echo "driver: $DRIVER"
+          if [ -z "$DRIVER" ]; then
+            echo "FAIL: expected driver output to be set"
+            exit 1
+          fi
+          echo "PASS: driver is '$DRIVER'"
+      - name: Assert builder exists but is not the current builder
+        run: |
+          echo "Checking docker buildx ls..."
+          docker buildx ls
+          # The builder should exist
+          if ! docker buildx ls | grep -q "no-use-builder"; then
+            echo "FAIL: builder 'no-use-builder' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: builder 'no-use-builder' exists"
+          # The current builder (marked with *) should NOT be no-use-builder
+          CURRENT=$(docker buildx ls | grep '\*' | awk '{print $1}' | tr -d '*')
+          echo "Current builder: $CURRENT"
+          if [ "$CURRENT" = "no-use-builder" ]; then
+            echo "FAIL: 'no-use-builder' should not be the current builder when use=false"
+            exit 1
+          fi
+          echo "PASS: 'no-use-builder' is not the current builder"
