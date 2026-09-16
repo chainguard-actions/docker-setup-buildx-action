@@ -1,0 +1,64 @@
+name: Test fixed platforms
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: buildx
+        uses: .
+        with:
+          driver: 'docker-container'
+          platforms: 'linux/amd64,linux/arm64'
+          use: 'true'
+
+      - name: Assert builder name output is set
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "builder name: $BUILDER_NAME"
+          if [ -z "$BUILDER_NAME" ]; then
+            echo "FAIL: expected builder name to be set"
+            exit 1
+          fi
+          echo "PASS: builder name is '$BUILDER_NAME'"
+
+      - name: Assert platforms output contains linux/amd64
+        env:
+          PLATFORMS: ${{ steps.buildx.outputs.platforms }}
+        run: |
+          echo "platforms: $PLATFORMS"
+          if [ -z "$PLATFORMS" ]; then
+            echo "FAIL: expected platforms output to be set"
+            exit 1
+          fi
+          if ! echo "$PLATFORMS" | grep -q "linux/amd64"; then
+            echo "FAIL: expected platforms to contain 'linux/amd64', got '$PLATFORMS'"
+            exit 1
+          fi
+          echo "PASS: platforms contains 'linux/amd64'"
+
+      - name: Assert driver output is docker-container
+        env:
+          DRIVER: ${{ steps.buildx.outputs.driver }}
+        run: |
+          echo "driver: $DRIVER"
+          if [ "$DRIVER" != "docker-container" ]; then
+            echo "FAIL: expected driver to be 'docker-container', got '$DRIVER'"
+            exit 1
+          fi
+          echo "PASS: driver is 'docker-container'"
+
+      - name: Assert builder is active via docker buildx ls
+        env:
+          BUILDER_NAME: ${{ steps.buildx.outputs.name }}
+        run: |
+          echo "Listing buildx builders..."
+          docker buildx ls
+          if ! docker buildx ls | grep -q "$BUILDER_NAME"; then
+            echo "FAIL: builder '$BUILDER_NAME' not found in docker buildx ls"
+            exit 1
+          fi
+          echo "PASS: builder '$BUILDER_NAME' found"
